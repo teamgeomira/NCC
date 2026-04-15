@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Cloudinary Arkiv – Hierarkisk fillagring</title>
-    <link rel="icon" href="favicon.png" type="image/png">
+    <title>Cloudinary Arkiv – Visa, Ladda ner, Ta bort</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -39,15 +38,11 @@
             background-clip: text;
             -webkit-background-clip: text;
             color: transparent;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
         }
 
         .header p {
             color: #2c6079;
             margin-top: 0.3rem;
-            font-size: 0.9rem;
         }
 
         /* Sökrad */
@@ -58,14 +53,13 @@
             margin-bottom: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.8rem;
+            flex-wrap: wrap;
             box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            border: 1px solid #e2edf5;
         }
 
         .search-bar i {
             color: #8bb4d0;
-            font-size: 1.2rem;
         }
 
         .search-bar input {
@@ -75,6 +69,7 @@
             font-size: 0.95rem;
             outline: none;
             font-family: 'Inter', sans-serif;
+            min-width: 150px;
         }
 
         .search-bar button {
@@ -85,7 +80,6 @@
             color: white;
             cursor: pointer;
             font-weight: 500;
-            transition: 0.2s;
         }
 
         .search-bar button:hover {
@@ -129,13 +123,6 @@
             margin-top: 8px;
         }
 
-        .dropzone small {
-            display: block;
-            margin-top: 5px;
-            color: #6c8dab;
-            font-size: 0.75rem;
-        }
-
         .btn-select {
             background: #eef3fc;
             border: 1px solid #caddf0;
@@ -146,7 +133,6 @@
             align-items: center;
             gap: 8px;
             margin-top: 10px;
-            font-size: 0.85rem;
         }
 
         /* Status */
@@ -155,11 +141,11 @@
             border-radius: 1rem;
             padding: 0.7rem 1rem;
             margin-bottom: 1.5rem;
-            font-size: 0.8rem;
             display: flex;
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
+            font-size: 0.85rem;
         }
 
         .progress-bg {
@@ -177,7 +163,7 @@
             transition: width 0.2s;
         }
 
-        /* Hierarkisk trädvy */
+        /* Trädvy */
         .tree-container {
             background: white;
             border-radius: 1.2rem;
@@ -198,7 +184,6 @@
             align-items: center;
             gap: 8px;
             border-radius: 0.5rem;
-            transition: 0.1s;
         }
 
         .tree-item:hover {
@@ -207,10 +192,7 @@
 
         .tree-toggle {
             width: 24px;
-            height: 24px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
+            text-align: center;
             cursor: pointer;
             color: #5a8eb0;
             font-size: 0.8rem;
@@ -226,25 +208,18 @@
             font-size: 0.9rem;
         }
 
-        .tree-label small {
-            font-weight: normal;
-            color: #7a97b3;
-            margin-left: 6px;
-            font-size: 0.7rem;
-        }
-
         .children {
             margin-left: 1.8rem;
             border-left: 1px solid #e2edf5;
         }
 
         .file-item-tree {
-            padding: 0.4rem 0.4rem 0.4rem 2rem;
+            padding: 0.5rem 0.5rem 0.5rem 2rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 10px;
             border-bottom: 1px solid #f0f4f9;
         }
 
@@ -260,32 +235,50 @@
         }
 
         .file-info i {
+            width: 28px;
             color: #5a8eb0;
-            width: 24px;
         }
 
         .file-name-tree {
             font-size: 0.85rem;
             word-break: break-all;
+            max-width: 300px;
         }
 
-        .file-links {
+        .file-actions {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
         }
 
-        .link-icon {
+        .action-btn {
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 0.8rem;
-            padding: 4px 8px;
-            border-radius: 1rem;
+            font-size: 0.75rem;
+            padding: 4px 10px;
+            border-radius: 1.5rem;
             transition: 0.1s;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
 
-        .link-icon:hover {
-            background: #e9f0f8;
+        .action-btn.view {
+            background: #eef3fc;
+            color: #2c7cb6;
+        }
+        .action-btn.download {
+            background: #eef3fc;
+            color: #10b981;
+        }
+        .action-btn.delete {
+            background: #fee2e2;
+            color: #b91c2c;
+        }
+        .action-btn:hover {
+            filter: brightness(0.95);
+            transform: scale(0.97);
         }
 
         .empty-folder {
@@ -325,11 +318,50 @@
             font-size: 0.7rem;
         }
 
+        .modal-preview {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .modal-content-preview {
+            background: white;
+            border-radius: 1rem;
+            max-width: 90%;
+            max-height: 90%;
+            overflow: auto;
+            position: relative;
+            padding: 1rem;
+        }
+
+        .modal-content-preview iframe, .modal-content-preview img, .modal-content-preview video {
+            max-width: 100%;
+            max-height: 80vh;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 2rem;
+            cursor: pointer;
+            color: #333;
+        }
+
         @media (max-width: 768px) {
             body { padding: 1rem; }
             .file-item-tree { flex-direction: column; align-items: flex-start; }
-            .file-links { margin-left: 2rem; }
+            .file-actions { margin-left: 2rem; }
             .toast { white-space: normal; text-align: center; }
+            .file-name-tree { max-width: 200px; }
         }
     </style>
 </head>
@@ -337,23 +369,24 @@
 <div class="container">
     <div class="header">
         <h1><i class="fas fa-cloud-upload-alt"></i> Cloudinary Arkiv</h1>
-        <p>Ladda upp filer → Organiseras automatiskt efter datum → Kopiera länkar till Excel</p>
+        <p>Ladda upp → Organisera efter datum → Visa, ladda ner eller ta bort</p>
     </div>
 
-    <!-- Sökfält -->
+    <!-- Sök -->
     <div class="search-bar">
         <i class="fas fa-search"></i>
         <input type="text" id="searchInput" placeholder="Sök efter filnamn...">
         <button id="searchBtn">Sök</button>
         <button id="clearSearchBtn" style="background:#6c8dab;">Rensa</button>
+        <button id="expandAllBtn" style="background:#e67e22;">📂 Expandera alla</button>
     </div>
     <div id="searchResultsInfo" class="search-results"></div>
 
-    <!-- Uppladdningszon -->
+    <!-- Uppladdning -->
     <div class="dropzone" id="dropzone">
         <i class="fas fa-cloud-upload-alt"></i>
         <p>Dra & släpp filer hit</p>
-        <small>Alla format stöds: PDF, DWG, ZIP, JPG, PNG, DOCX, m.m.</small>
+        <small>Alla format stöds: PDF, DWG, ZIP, JPG, PNG, MP4, DOCX m.m.</small>
         <div class="btn-select" id="selectFilesBtn"><i class="fas fa-folder-open"></i> Välj filer</div>
     </div>
     <input type="file" id="fileInput" multiple style="display:none">
@@ -365,17 +398,23 @@
         <div class="progress-bg"><div class="progress-fill" id="uploadProgress"></div></div>
     </div>
 
-    <!-- Hierarkisk trädvy -->
+    <!-- Trädvy -->
     <div style="margin-top: 1rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
-            <h3 style="font-size: 1.1rem;"><i class="fas fa-folder-tree"></i> Filarkiv (År → Månad → Dag)</h3>
-            <button id="expandAllBtn" style="background:none; border:none; color:#2c7cb6; cursor:pointer; font-size:0.8rem;">📂 Expandera alla</button>
-        </div>
+        <h3 style="font-size: 1rem; margin-bottom: 0.5rem;"><i class="fas fa-folder-tree"></i> Filarkiv (År → Månad → Dag)</h3>
         <div class="tree-container" id="treeContainer">
             <div class="loading">Laddar filer...</div>
         </div>
     </div>
 </div>
+
+<!-- Modal för visning -->
+<div id="previewModal" class="modal-preview">
+    <div class="modal-content-preview">
+        <span class="close-modal" onclick="closePreviewModal()">&times;</span>
+        <div id="previewContent"></div>
+    </div>
+</div>
+
 <div id="toastMsg" class="toast">✅ Klart</div>
 
 <script>
@@ -383,6 +422,8 @@
     const CLOUD_NAME = "dc1zqri3o";
     const UPLOAD_PRESET = "ncc_nordic";
     const FOLDER = "underlag";
+    const API_KEY = "725351489155421";
+    const API_SECRET = "22W8BZheLQtKAw7LEayY1S60Ky4";
     // ==========================================================================
 
     // DOM-element
@@ -399,8 +440,8 @@
     const searchResultsInfo = document.getElementById('searchResultsInfo');
     const expandAllBtn = document.getElementById('expandAllBtn');
 
-    // Lagring av filer (hämtas från localStorage + nya uppladdningar)
-    let allFiles = [];      // { publicId, filename, size, date, previewUrl, downloadUrl, fullPath }
+    // Data
+    let allFiles = [];
     let searchMode = false;
     let searchResults = [];
 
@@ -440,22 +481,112 @@
         return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
-    // Spara filer till localStorage
+    // Visa fil online (Cloudinary stöder PDF, bilder, video)
+    function viewFileOnline(url, filename) {
+        const previewDiv = document.getElementById('previewContent');
+        const ext = filename.split('.').pop().toLowerCase();
+        const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'svg'];
+        const videoExts = ['mp4', 'webm', 'mov', 'avi'];
+        
+        if (imageExts.includes(ext)) {
+            previewDiv.innerHTML = `<img src="${url}" alt="${filename}" style="max-width:100%; max-height:80vh;">`;
+        } else if (videoExts.includes(ext)) {
+            previewDiv.innerHTML = `<video controls style="max-width:100%; max-height:80vh;"><source src="${url}" type="video/${ext}">Din webbläsare stödjer inte videouppspelning.</video>`;
+        } else if (ext === 'pdf') {
+            previewDiv.innerHTML = `<iframe src="${url}" style="width:100%; height:80vh;" frameborder="0"></iframe>`;
+        } else {
+            previewDiv.innerHTML = `<div style="text-align:center; padding:2rem;"><i class="fas fa-file" style="font-size:3rem;"></i><p>Förhandsgranskning stöds inte för denna filtyp.<br><a href="${url}" target="_blank" style="color:#2c7cb6;">Öppna i ny flik</a></p></div>`;
+        }
+        document.getElementById('previewModal').style.display = 'flex';
+    }
+
+    function closePreviewModal() {
+        document.getElementById('previewModal').style.display = 'none';
+        document.getElementById('previewContent').innerHTML = '';
+    }
+
+    // Ladda ner fil (öppnar nedladdningsfönster)
+    function downloadFile(url, filename) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast(`⬇️ Laddar ner ${filename}`);
+    }
+
+    // Ta bort fil från Cloudinary (kräver signerad request)
+    async function deleteFromCloudinary(publicId, fileObj) {
+        try {
+            // Generera timestamp och signatur
+            const timestamp = Math.floor(Date.now() / 1000);
+            const signatureInput = `public_id=${publicId}&timestamp=${timestamp}${API_SECRET}`;
+            const signature = await sha1(signatureInput);
+            
+            const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/destroy`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    public_id: publicId,
+                    api_key: API_KEY,
+                    timestamp: timestamp,
+                    signature: signature
+                })
+            });
+            const data = await response.json();
+            if (data.result === 'ok') {
+                return true;
+            } else {
+                console.error('Delete error:', data);
+                return false;
+            }
+        } catch (err) {
+            console.error('Delete error:', err);
+            return false;
+        }
+    }
+
+    // SHA1-hash för signatur (Cloudinary kräver)
+    async function sha1(message) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+
+    // Ta bort fil (med bekräftelse)
+    async function deleteFile(file) {
+        if (!confirm(`Är du säker på att du vill ta bort "${file.filename}" permanent från Cloudinary?`)) return;
+        
+        showToast(`🗑️ Tar bort ${file.filename}...`);
+        const success = await deleteFromCloudinary(file.publicId, file);
+        if (success) {
+            allFiles = allFiles.filter(f => f.publicId !== file.publicId);
+            saveToLocalStorage();
+            if (!searchMode) renderTree();
+            else searchFiles(searchInput.value);
+            showToast(`✅ ${file.filename} borttagen`);
+        } else {
+            showToast(`❌ Kunde inte ta bort ${file.filename}`, true);
+        }
+    }
+
+    // Spara till localStorage
     function saveToLocalStorage() {
-        localStorage.setItem('cloudinary_files', JSON.stringify(allFiles.map(f => ({
+        localStorage.setItem('cloudinary_files_v2', JSON.stringify(allFiles.map(f => ({
             publicId: f.publicId,
             filename: f.filename,
             size: f.size,
             date: f.date,
             previewUrl: f.previewUrl,
-            downloadUrl: f.downloadUrl,
-            fullPath: f.fullPath
+            downloadUrl: f.downloadUrl
         }))));
     }
 
-    // Ladda sparade filer från localStorage
     function loadFromLocalStorage() {
-        const saved = localStorage.getItem('cloudinary_files');
+        const saved = localStorage.getItem('cloudinary_files_v2');
         if (saved) {
             try {
                 allFiles = JSON.parse(saved);
@@ -464,7 +595,7 @@
         }
     }
 
-    // Bygg hierarkisk struktur (År → Månad → Dag → Filer)
+    // Bygg hierarki
     function buildHierarchy(files) {
         const tree = {};
         files.forEach(file => {
@@ -472,22 +603,27 @@
             const year = date.getFullYear();
             const month = date.getMonth() + 1;
             const day = date.getDate();
-            const monthKey = `${year}-${String(month).padStart(2,'0')}`;
-            const dayKey = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-            
             if (!tree[year]) tree[year] = { months: {} };
             if (!tree[year].months[month]) tree[year].months[month] = { days: {} };
             if (!tree[year].months[month].days[day]) tree[year].months[month].days[day] = [];
-            
             tree[year].months[month].days[day].push(file);
         });
         return tree;
     }
 
-    // Månadsnamn på svenska
     const monthNames = ['Januari', 'Februari', 'Mars', 'April', 'Maj', 'Juni', 'Juli', 'Augusti', 'September', 'Oktober', 'November', 'December'];
 
-    // Rendera trädvy (med expanderingsmöjlighet)
+    function getFileIcon(filename) {
+        if (filename.match(/\.(pdf)$/i)) return 'fa-file-pdf';
+        if (filename.match(/\.(jpg|jpeg|png|gif|webp|bmp|svg)$/i)) return 'fa-file-image';
+        if (filename.match(/\.(mp4|webm|mov|avi)$/i)) return 'fa-file-video';
+        if (filename.match(/\.(zip|rar|7z)$/i)) return 'fa-file-archive';
+        if (filename.match(/\.(dwg|dxf)$/i)) return 'fa-draw-polygon';
+        if (filename.match(/\.(doc|docx)$/i)) return 'fa-file-word';
+        if (filename.match(/\.(xls|xlsx)$/i)) return 'fa-file-excel';
+        return 'fa-file';
+    }
+
     function renderTree() {
         const filesToShow = searchMode ? searchResults : allFiles;
         if (filesToShow.length === 0) {
@@ -497,66 +633,47 @@
         
         const tree = buildHierarchy(filesToShow);
         let html = '<div class="tree-root">';
-        
-        // Sortera år (fallande)
         const years = Object.keys(tree).sort((a,b) => b - a);
+        
         for (const year of years) {
             const yearData = tree[year];
-            html += `
-                <div class="tree-node">
-                    <div class="tree-item" data-type="year" data-year="${year}">
+            html += `<div class="tree-node"><div class="tree-item" data-type="year" data-year="${year}">
                         <span class="tree-toggle" data-expanded="false">▶</span>
                         <i class="fas fa-folder tree-icon"></i>
                         <span class="tree-label">${year} <small>(${Object.values(yearData.months).reduce((sum, m) => sum + Object.values(m.days).reduce((s, d) => s + d.length, 0), 0)} filer)</small></span>
-                    </div>
-                    <div class="children year-children" style="display:none;">
-            `;
+                    </div><div class="children year-children" style="display:none;">`;
             
-            // Sortera månader (fallande)
             const months = Object.keys(yearData.months).sort((a,b) => b - a);
             for (const month of months) {
                 const monthData = yearData.months[month];
                 const fileCount = Object.values(monthData.days).reduce((s, d) => s + d.length, 0);
-                html += `
-                    <div class="tree-node">
-                        <div class="tree-item" data-type="month" data-year="${year}" data-month="${month}">
+                html += `<div class="tree-node"><div class="tree-item" data-type="month" data-year="${year}" data-month="${month}">
                             <span class="tree-toggle" data-expanded="false">▶</span>
                             <i class="fas fa-folder tree-icon"></i>
                             <span class="tree-label">${monthNames[parseInt(month)-1]} <small>(${fileCount} filer)</small></span>
-                        </div>
-                        <div class="children month-children" style="display:none;">
-                `;
+                        </div><div class="children month-children" style="display:none;">`;
                 
-                // Sortera dagar (fallande)
                 const days = Object.keys(monthData.days).sort((a,b) => b - a);
                 for (const day of days) {
                     const dayFiles = monthData.days[day];
-                    html += `
-                        <div class="tree-node">
-                            <div class="tree-item" data-type="day" data-year="${year}" data-month="${month}" data-day="${day}">
+                    html += `<div class="tree-node"><div class="tree-item" data-type="day" data-year="${year}" data-month="${month}" data-day="${day}">
                                 <span class="tree-toggle" data-expanded="false">▶</span>
                                 <i class="fas fa-folder tree-icon"></i>
                                 <span class="tree-label">${day} <small>(${dayFiles.length} filer)</small></span>
-                            </div>
-                            <div class="children day-children" style="display:none;">
-                    `;
+                            </div><div class="children day-children" style="display:none;">`;
                     
-                    // Visa filer under dagen
                     for (const file of dayFiles) {
-                        const fileIcon = file.filename.match(/\.(pdf)$/i) ? 'fa-file-pdf' :
-                                        file.filename.match(/\.(jpg|jpeg|png|gif|webp)$/i) ? 'fa-file-image' :
-                                        file.filename.match(/\.(zip|rar|7z)$/i) ? 'fa-file-archive' :
-                                        file.filename.match(/\.(dwg|dxf)$/i) ? 'fa-draw-polygon' : 'fa-file';
                         html += `
                             <div class="file-item-tree">
                                 <div class="file-info">
-                                    <i class="fas ${fileIcon}"></i>
+                                    <i class="fas ${getFileIcon(file.filename)}"></i>
                                     <span class="file-name-tree" title="${escapeHtml(file.filename)}">${escapeHtml(file.filename.length > 50 ? file.filename.substring(0,47)+'...' : file.filename)}</span>
                                     <span class="badge">${formatSize(file.size)}</span>
                                 </div>
-                                <div class="file-links">
-                                    <button class="link-icon copy-preview" data-url="${file.previewUrl}" title="Kopiera visningslänk"><i class="fas fa-eye"></i> Visa</button>
-                                    <button class="link-icon copy-download" data-url="${file.downloadUrl}" title="Kopiera nedladdningslänk"><i class="fas fa-download"></i> Ladda ner</button>
+                                <div class="file-actions">
+                                    <button class="action-btn view" data-url="${file.previewUrl}" data-filename="${escapeHtml(file.filename)}"><i class="fas fa-eye"></i> Visa</button>
+                                    <button class="action-btn download" data-url="${file.downloadUrl}" data-filename="${escapeHtml(file.filename)}"><i class="fas fa-download"></i> Ladda ner</button>
+                                    <button class="action-btn delete" data-publicid="${file.publicId}" data-filename="${escapeHtml(file.filename)}"><i class="fas fa-trash"></i> Ta bort</button>
                                 </div>
                             </div>
                         `;
@@ -570,48 +687,58 @@
         html += '</div>';
         treeContainer.innerHTML = html;
         
-        // Lägg till expanderingsfunktionalitet
+        // Expandera/kollapsa
         document.querySelectorAll('.tree-item').forEach(item => {
             const toggle = item.querySelector('.tree-toggle');
-            const childrenDiv = item.parentElement.querySelector('.children');
+            const childrenDiv = item.parentElement?.querySelector('.children');
             if (toggle && childrenDiv) {
                 toggle.addEventListener('click', (e) => {
                     e.stopPropagation();
                     const isExpanded = toggle.getAttribute('data-expanded') === 'true';
-                    if (isExpanded) {
-                        childrenDiv.style.display = 'none';
-                        toggle.setAttribute('data-expanded', 'false');
-                        toggle.textContent = '▶';
-                    } else {
-                        childrenDiv.style.display = 'block';
-                        toggle.setAttribute('data-expanded', 'true');
-                        toggle.textContent = '▼';
-                    }
+                    childrenDiv.style.display = isExpanded ? 'none' : 'block';
+                    toggle.setAttribute('data-expanded', isExpanded ? 'false' : 'true');
+                    toggle.textContent = isExpanded ? '▶' : '▼';
                 });
             }
         });
         
-        // Lägg till kopieringsfunktioner
-        document.querySelectorAll('.copy-preview').forEach(btn => {
-            btn.addEventListener('click', () => copyToClipboard(btn.getAttribute('data-url')));
+        // Visa
+        document.querySelectorAll('.action-btn.view').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const url = btn.getAttribute('data-url');
+                const filename = btn.getAttribute('data-filename');
+                viewFileOnline(url, filename);
+            });
         });
-        document.querySelectorAll('.copy-download').forEach(btn => {
-            btn.addEventListener('click', () => copyToClipboard(btn.getAttribute('data-url')));
+        
+        // Ladda ner
+        document.querySelectorAll('.action-btn.download').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const url = btn.getAttribute('data-url');
+                const filename = btn.getAttribute('data-filename');
+                downloadFile(url, filename);
+            });
+        });
+        
+        // Ta bort
+        document.querySelectorAll('.action-btn.delete').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const publicId = btn.getAttribute('data-publicid');
+                const filename = btn.getAttribute('data-filename');
+                const fileObj = allFiles.find(f => f.publicId === publicId);
+                if (fileObj) deleteFile(fileObj);
+            });
         });
     }
 
-    // Expandera alla noder
     function expandAllNodes() {
-        const allChildren = document.querySelectorAll('.children');
-        allChildren.forEach(child => child.style.display = 'block');
-        const allToggles = document.querySelectorAll('.tree-toggle');
-        allToggles.forEach(toggle => {
+        document.querySelectorAll('.children').forEach(child => child.style.display = 'block');
+        document.querySelectorAll('.tree-toggle').forEach(toggle => {
             toggle.setAttribute('data-expanded', 'true');
             toggle.textContent = '▼';
         });
     }
 
-    // Sökfunktion
     function searchFiles(query) {
         if (!query.trim()) {
             searchMode = false;
@@ -638,7 +765,7 @@
         renderTree();
     }
 
-    // Ladda upp fil till Cloudinary
+    // Uppladdning
     async function uploadFile(file) {
         const formData = new FormData();
         const timestamp = Date.now();
@@ -667,8 +794,7 @@
                 size: file.size,
                 date: new Date().toISOString(),
                 previewUrl: data.secure_url,
-                downloadUrl: downloadUrl,
-                fullPath: data.public_id
+                downloadUrl: downloadUrl
             };
         } catch (err) {
             console.error(err);
@@ -676,7 +802,6 @@
         }
     }
 
-    // Ladda upp flera filer
     async function uploadMultipleFiles(files) {
         if (!files.length) return;
         let completed = 0;
@@ -727,7 +852,7 @@
     expandAllBtn.addEventListener('click', expandAllNodes);
     searchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchFiles(searchInput.value); });
 
-    // Initiera: ladda sparade filer
+    // Initiera
     loadFromLocalStorage();
     if (allFiles.length === 0) {
         treeContainer.innerHTML = `<div class="loading"><i class="fas fa-cloud-upload-alt"></i> Dra och släpp filer för att börja</div>`;
