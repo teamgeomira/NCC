@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Cloudinary Arkiv – Visa, Ladda ner, Ta bort</title>
+    <title>Cloudinary Arkiv – Visa, Ladda ner, Kopiera, Ta bort</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%232c7cb6'/%3E%3Ctext x='50' y='70' font-size='60' text-anchor='middle' fill='white' font-weight='bold'%3EC%3C/text%3E%3C/svg%3E" type="image/png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
@@ -232,6 +233,7 @@
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
+            flex: 2;
         }
 
         .file-info i {
@@ -247,7 +249,7 @@
 
         .file-actions {
             display: flex;
-            gap: 8px;
+            gap: 6px;
             flex-wrap: wrap;
         }
 
@@ -255,7 +257,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             padding: 4px 10px;
             border-radius: 1.5rem;
             transition: 0.1s;
@@ -271,6 +273,10 @@
         .action-btn.download {
             background: #eef3fc;
             color: #10b981;
+        }
+        .action-btn.copy {
+            background: #fef3c7;
+            color: #92400e;
         }
         .action-btn.delete {
             background: #fee2e2;
@@ -369,7 +375,7 @@
 <div class="container">
     <div class="header">
         <h1><i class="fas fa-cloud-upload-alt"></i> Cloudinary Arkiv</h1>
-        <p>Ladda upp → Organisera efter datum → Visa, ladda ner eller ta bort</p>
+        <p>Ladda upp → Organisera efter datum → Visa, kopiera, ladda ner eller ta bort</p>
     </div>
 
     <!-- Sök -->
@@ -456,7 +462,7 @@
     async function copyToClipboard(text) {
         try {
             await navigator.clipboard.writeText(text);
-            showToast("📋 Länk kopierad!");
+            showToast("📋 Länk kopierad till urklipp!");
         } catch {
             const ta = document.createElement('textarea');
             ta.value = text;
@@ -464,7 +470,7 @@
             ta.select();
             document.execCommand('copy');
             document.body.removeChild(ta);
-            showToast("📋 Länk kopierad");
+            showToast("📋 Länk kopierad (gammal metod)");
         }
     }
 
@@ -481,7 +487,7 @@
         return str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;');
     }
 
-    // Visa fil online (Cloudinary stöder PDF, bilder, video)
+    // Visa fil online
     function viewFileOnline(url, filename) {
         const previewDiv = document.getElementById('previewContent');
         const ext = filename.split('.').pop().toLowerCase();
@@ -505,7 +511,7 @@
         document.getElementById('previewContent').innerHTML = '';
     }
 
-    // Ladda ner fil (öppnar nedladdningsfönster)
+    // Ladda ner fil
     function downloadFile(url, filename) {
         const a = document.createElement('a');
         a.href = url;
@@ -516,10 +522,18 @@
         showToast(`⬇️ Laddar ner ${filename}`);
     }
 
-    // Ta bort fil från Cloudinary (kräver signerad request)
-    async function deleteFromCloudinary(publicId, fileObj) {
+    // SHA1-hash för signatur
+    async function sha1(message) {
+        const msgBuffer = new TextEncoder().encode(message);
+        const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        return hashHex;
+    }
+
+    // Ta bort fil från Cloudinary
+    async function deleteFromCloudinary(publicId) {
         try {
-            // Generera timestamp och signatur
             const timestamp = Math.floor(Date.now() / 1000);
             const signatureInput = `public_id=${publicId}&timestamp=${timestamp}${API_SECRET}`;
             const signature = await sha1(signatureInput);
@@ -535,38 +549,26 @@
                 })
             });
             const data = await response.json();
-            if (data.result === 'ok') {
-                return true;
-            } else {
-                console.error('Delete error:', data);
-                return false;
-            }
+            return data.result === 'ok';
         } catch (err) {
             console.error('Delete error:', err);
             return false;
         }
     }
 
-    // SHA1-hash för signatur (Cloudinary kräver)
-    async function sha1(message) {
-        const msgBuffer = new TextEncoder().encode(message);
-        const hashBuffer = await crypto.subtle.digest('SHA-1', msgBuffer);
-        const hashArray = Array.from(new Uint8Array(hashBuffer));
-        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-        return hashHex;
-    }
-
-    // Ta bort fil (med bekräftelse)
     async function deleteFile(file) {
         if (!confirm(`Är du säker på att du vill ta bort "${file.filename}" permanent från Cloudinary?`)) return;
         
         showToast(`🗑️ Tar bort ${file.filename}...`);
-        const success = await deleteFromCloudinary(file.publicId, file);
+        const success = await deleteFromCloudinary(file.publicId);
         if (success) {
             allFiles = allFiles.filter(f => f.publicId !== file.publicId);
             saveToLocalStorage();
-            if (!searchMode) renderTree();
-            else searchFiles(searchInput.value);
+            if (searchMode && searchInput.value.trim()) {
+                searchFiles(searchInput.value);
+            } else {
+                renderTree();
+            }
             showToast(`✅ ${file.filename} borttagen`);
         } else {
             showToast(`❌ Kunde inte ta bort ${file.filename}`, true);
@@ -575,7 +577,7 @@
 
     // Spara till localStorage
     function saveToLocalStorage() {
-        localStorage.setItem('cloudinary_files_v2', JSON.stringify(allFiles.map(f => ({
+        localStorage.setItem('cloudinary_files_v3', JSON.stringify(allFiles.map(f => ({
             publicId: f.publicId,
             filename: f.filename,
             size: f.size,
@@ -586,7 +588,7 @@
     }
 
     function loadFromLocalStorage() {
-        const saved = localStorage.getItem('cloudinary_files_v2');
+        const saved = localStorage.getItem('cloudinary_files_v3');
         if (saved) {
             try {
                 allFiles = JSON.parse(saved);
@@ -627,7 +629,7 @@
     function renderTree() {
         const filesToShow = searchMode ? searchResults : allFiles;
         if (filesToShow.length === 0) {
-            treeContainer.innerHTML = `<div class="loading"><i class="fas fa-folder-open"></i> Inga filer uppladdade än.</div>`;
+            treeContainer.innerHTML = `<div class="loading"><i class="fas fa-folder-open"></i> ${searchMode ? 'Inga filer matchar sökningen.' : 'Inga filer uppladdade än.'}</div>`;
             return;
         }
         
@@ -637,10 +639,11 @@
         
         for (const year of years) {
             const yearData = tree[year];
+            const yearFileCount = Object.values(yearData.months).reduce((sum, m) => sum + Object.values(m.days).reduce((s, d) => s + d.length, 0), 0);
             html += `<div class="tree-node"><div class="tree-item" data-type="year" data-year="${year}">
                         <span class="tree-toggle" data-expanded="false">▶</span>
                         <i class="fas fa-folder tree-icon"></i>
-                        <span class="tree-label">${year} <small>(${Object.values(yearData.months).reduce((sum, m) => sum + Object.values(m.days).reduce((s, d) => s + d.length, 0), 0)} filer)</small></span>
+                        <span class="tree-label">${year} <small>(${yearFileCount} filer)</small></span>
                     </div><div class="children year-children" style="display:none;">`;
             
             const months = Object.keys(yearData.months).sort((a,b) => b - a);
@@ -672,6 +675,7 @@
                                 </div>
                                 <div class="file-actions">
                                     <button class="action-btn view" data-url="${file.previewUrl}" data-filename="${escapeHtml(file.filename)}"><i class="fas fa-eye"></i> Visa</button>
+                                    <button class="action-btn copy" data-url="${file.previewUrl}"><i class="fas fa-copy"></i> Kopiera länk</button>
                                     <button class="action-btn download" data-url="${file.downloadUrl}" data-filename="${escapeHtml(file.filename)}"><i class="fas fa-download"></i> Ladda ner</button>
                                     <button class="action-btn delete" data-publicid="${file.publicId}" data-filename="${escapeHtml(file.filename)}"><i class="fas fa-trash"></i> Ta bort</button>
                                 </div>
@@ -711,6 +715,14 @@
             });
         });
         
+        // Kopiera länk
+        document.querySelectorAll('.action-btn.copy').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const url = btn.getAttribute('data-url');
+                copyToClipboard(url);
+            });
+        });
+        
         // Ladda ner
         document.querySelectorAll('.action-btn.download').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -724,7 +736,6 @@
         document.querySelectorAll('.action-btn.delete').forEach(btn => {
             btn.addEventListener('click', () => {
                 const publicId = btn.getAttribute('data-publicid');
-                const filename = btn.getAttribute('data-filename');
                 const fileObj = allFiles.find(f => f.publicId === publicId);
                 if (fileObj) deleteFile(fileObj);
             });
@@ -751,10 +762,13 @@
         searchMode = true;
         searchResultsInfo.style.display = 'block';
         searchResultsInfo.innerHTML = `<i class="fas fa-search"></i> Hittade ${searchResults.length} fil(er) som matchar "${escapeHtml(query)}". <span id="clearSearchInline" style="color:#2c7cb6; cursor:pointer;">Visa alla</span>`;
-        document.getElementById('clearSearchInline')?.addEventListener('click', () => {
-            searchInput.value = '';
-            clearSearch();
-        });
+        const clearInline = document.getElementById('clearSearchInline');
+        if (clearInline) {
+            clearInline.addEventListener('click', () => {
+                searchInput.value = '';
+                clearSearch();
+            });
+        }
         renderTree();
     }
 
@@ -856,8 +870,6 @@
     loadFromLocalStorage();
     if (allFiles.length === 0) {
         treeContainer.innerHTML = `<div class="loading"><i class="fas fa-cloud-upload-alt"></i> Dra och släpp filer för att börja</div>`;
-    } else {
-        renderTree();
     }
 </script>
 </body>
